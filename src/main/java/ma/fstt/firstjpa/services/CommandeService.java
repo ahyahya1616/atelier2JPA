@@ -1,75 +1,69 @@
 package ma.fstt.firstjpa.services;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.EntityTransaction;
 import ma.fstt.firstjpa.entities.Commande;
+import ma.fstt.firstjpa.entities.Internaute;
+import ma.fstt.firstjpa.entities.LignePanier;
+import ma.fstt.firstjpa.entities.Panier;
 
+import java.time.LocalDate;
 import java.util.List;
 
-@ApplicationScoped
 public class CommandeService {
 
-    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("firstJPA");
+    private EntityManager em;
+    private PanierService panierService;
+    private LignePanierService lignePanierService;
 
-    public void ajouterCommande(Commande commande) {
-        EntityManager em = emf.createEntityManager();
+    public CommandeService(EntityManager em) {
+        this.em = em;
+        this.panierService = new PanierService(em);
+        this.lignePanierService = new LignePanierService(em);
+    }
+
+    public void confirmerAchat(Internaute internaute, List<LignePanier> lignesSession) {
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
         try {
-            em.getTransaction().begin();
-            em.persist(commande);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            em.getTransaction().rollback();
-            e.printStackTrace();
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<Commande> getAllCommandes() {
-        EntityManager em = emf.createEntityManager();
-        List<Commande> commandes = em.createQuery("SELECT c FROM Commande c", Commande.class)
-                .getResultList();
-        em.close();
-        return commandes;
-    }
-
-    public Commande getCommandeById(Long id) {
-        EntityManager em = emf.createEntityManager();
-        Commande commande = em.find(Commande.class, id);
-        em.close();
-        return commande;
-    }
-
-    public void supprimerCommande(Long id) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            Commande commande = em.find(Commande.class, id);
-            if (commande != null) {
-                em.remove(commande);
+            //  Calcul du total du panier
+            double totalPanier = 0.0;
+            for (LignePanier lp : lignesSession) {
+                totalPanier += lp.getSousTotal();
             }
-            em.getTransaction().commit();
+
+            //  Créer le panier
+            Panier panier = panierService.creerPanier(internaute, totalPanier);
+
+            //  Ajouter les lignes du panier
+            lignePanierService.ajouterLignesAuPanier(lignesSession, panier);
+
+            // Créer la commande
+            Commande commande = new Commande();
+            commande.setDateCommande(LocalDate.now().toString());
+            commande.setTotal(totalPanier);
+            commande.setStatut("Confirmée");
+            commande.setInternaute(internaute);
+
+            em.persist(commande);
+
+            tx.commit();
+
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (tx.isActive()) tx.rollback();
             e.printStackTrace();
-        } finally {
-            em.close();
         }
     }
 
-    public void modifierCommande(Commande commande) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            em.merge(commande);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            em.getTransaction().rollback();
-            e.printStackTrace();
-        } finally {
-            em.close();
-        }
+
+    public List<Commande> getCommandesByInternaute(Internaute internaute) {
+        return em.createQuery(
+                        "SELECT c FROM Commande c WHERE c.internaute = :internaute ORDER BY c.dateCommande DESC",
+                        Commande.class)
+                .setParameter("internaute", internaute)
+                .getResultList();
     }
+
+
 }

@@ -1,7 +1,8 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/includes/headerHtml.jsp" %>
 <%@ include file="/WEB-INF/includes/navbar.jsp" %>
 
-<div class="container mt-5">
+<div class="container mt-5" style="padding-bottom: 80px;">
     <div class="card mx-auto" style="max-width: 400px;">
         <div class="card-body">
             <h4 class="text-center mb-4">Connexion</h4>

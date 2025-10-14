@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="ma.fstt.firstjpa.entities.Internaute" %>
 
 <%
@@ -11,8 +11,7 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <% if (internaute != null) { %>
-                <li class="nav-item"><a class="nav-link" href="#">Mes commandes</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Mon panier</a></li>
+                <li class="nav-item"><a class="nav-link" href="commande?action=listCommande">Mes commandes</a></li>
                 <li class="nav-item"><a class="nav-link" href="internaute?action=logout">Déconnexion</a></li>
                 <% } else { %>
                 <li class="nav-item"><a class="nav-link" href="internaute?action=loginForm">Connexion</a></li>
