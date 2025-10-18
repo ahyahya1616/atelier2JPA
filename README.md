@@ -124,6 +124,25 @@ Grâce à **CDI**, l’`EntityManager` peut être injecté directement dans les 
 
 ---
 
+
+## 🖼️ Captures d’écran du site
+
+### 1️⃣ Page de connexion (Login)
+![Login](images/login.png)
+
+### 2️⃣ Page d'inscription (Register)
+![Register](images/register.png)
+
+### 3️⃣ Liste des produits (Vitrine)
+![Liste Produit](images/listProduits.png)
+
+### 4️⃣ Historique des commandes
+![Commande Historique](images/commandeHistorique.png)
+
+### 5️⃣ Panier
+![Panier](images/panier.png)
+
+
 ### 🧠 Améliorations possibles
 
 - Ajout d’un **module d’administration**.
