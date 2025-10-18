@@ -1,5 +1,6 @@
 package ma.fstt.firstjpa.web;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -11,7 +12,8 @@ import java.io.IOException;
 @WebServlet("/internaute")
 public class InternauteController extends HttpServlet {
 
-    private InternauteService internauteService = new InternauteService();
+    @Inject
+    private InternauteService internauteService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

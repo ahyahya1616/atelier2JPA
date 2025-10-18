@@ -1,14 +1,18 @@
 package ma.fstt.firstjpa.services;
 
-import jakarta.persistence.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import ma.fstt.firstjpa.entities.Internaute;
 
+@ApplicationScoped
 public class InternauteService {
 
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("firstJPA");
+    @Inject
+    private EntityManager em;
 
     public void inscrire(Internaute internaute) {
-        EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
             em.persist(internaute);
@@ -16,13 +20,10 @@ public class InternauteService {
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
-        } finally {
-            em.close();
         }
     }
 
     public Internaute connexion(String email, String password) {
-        EntityManager em = emf.createEntityManager();
         Internaute internaute = null;
         try {
             internaute = em.createQuery(
@@ -32,9 +33,7 @@ public class InternauteService {
                     .setParameter("pwd", password)
                     .getSingleResult();
         } catch (NoResultException e) {
-            internaute = null; // Aucun utilisateur trouvé
-        } finally {
-            em.close();
+            internaute = null; // Aucun internaute trouvé
         }
         return internaute;
     }

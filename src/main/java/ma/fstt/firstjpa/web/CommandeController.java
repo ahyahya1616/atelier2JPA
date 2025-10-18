@@ -1,8 +1,6 @@
 package ma.fstt.firstjpa.web;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.inject.Inject;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -17,26 +15,20 @@ import java.util.List;
 @WebServlet("/commande")
 public class CommandeController extends HttpServlet {
 
-    private EntityManagerFactory emf;
-
-    @Override
-    public void init() throws ServletException {
-        emf = Persistence.createEntityManagerFactory("firstJPA");
-    }
+    @Inject
+    private CommandeService commandeService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        EntityManager em = emf.createEntityManager();
-        CommandeService commandeService = new CommandeService(em);
 
         HttpSession session = request.getSession();
         Internaute internaute = (Internaute) session.getAttribute("internaute");
 
         if (internaute == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("internaute?action=loginForm");
             return;
         }
 
@@ -45,17 +37,11 @@ public class CommandeController extends HttpServlet {
             request.setAttribute("commandes", commandes);
             request.getRequestDispatcher("/WEB-INF/views/commande/listeCommandes.jsp").forward(request, response);
         }
-
-        em.close();
     }
-
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        EntityManager em = emf.createEntityManager();
-        CommandeService commandeService = new CommandeService(em);
 
         HttpSession session = request.getSession();
         Internaute internaute = (Internaute) session.getAttribute("internaute");
@@ -66,21 +52,14 @@ public class CommandeController extends HttpServlet {
             return;
         }
 
-        //  Enregistrer la commande dans la BDD
+        // Enregistrer la commande dans la BDD
         commandeService.confirmerAchat(internaute, panier);
 
         // Vider le panier de la session
         session.removeAttribute("panier");
 
-        // Rediriger vers une page de confirmation
+        // Rediriger vers la page de confirmation
         request.setAttribute("message", "Votre commande a été confirmée avec succès !");
         request.getRequestDispatcher("/WEB-INF/views/commande/confirmation.jsp").forward(request, response);
-
-        em.close();
-    }
-
-    @Override
-    public void destroy() {
-        emf.close();
     }
 }

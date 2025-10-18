@@ -1,30 +1,23 @@
 package ma.fstt.firstjpa.services;
 
-import jakarta.persistence.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import ma.fstt.firstjpa.entities.Produit;
 import java.util.List;
 
+@ApplicationScoped
 public class ProduitService {
 
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("firstJPA");
+    @Inject
+    private EntityManager em;
 
     public List<Produit> getAllProduits() {
-        EntityManager em = emf.createEntityManager();
-        List<Produit> produits = null;
-        try {
-            produits = em.createQuery("SELECT p FROM Produit p", Produit.class).getResultList();
-        } finally {
-            em.close();
-        }
-        return produits;
+        return em.createQuery("SELECT p FROM Produit p", Produit.class)
+                .getResultList();
     }
 
     public Produit findById(Long id) {
-        EntityManager em = emf.createEntityManager();
-        Produit produit = em.find(Produit.class, id);
-        em.close();
-        return produit;
+        return em.find(Produit.class, id);
     }
-
-
 }

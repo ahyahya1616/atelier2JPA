@@ -1,5 +1,7 @@
 package ma.fstt.firstjpa.services;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import ma.fstt.firstjpa.entities.Commande;
@@ -10,33 +12,33 @@ import ma.fstt.firstjpa.entities.Panier;
 import java.time.LocalDate;
 import java.util.List;
 
+@ApplicationScoped
 public class CommandeService {
 
+    @Inject
     private EntityManager em;
-    private PanierService panierService;
-    private LignePanierService lignePanierService;
 
-    public CommandeService(EntityManager em) {
-        this.em = em;
-        this.panierService = new PanierService(em);
-        this.lignePanierService = new LignePanierService(em);
-    }
+    @Inject
+    private PanierService panierService;
+
+    @Inject
+    private LignePanierService lignePanierService;
 
     public void confirmerAchat(Internaute internaute, List<LignePanier> lignesSession) {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
 
         try {
-            //  Calcul du total du panier
+            // Calcul du total du panier
             double totalPanier = 0.0;
             for (LignePanier lp : lignesSession) {
                 totalPanier += lp.getSousTotal();
             }
 
-            //  Créer le panier
+            // Créer le panier
             Panier panier = panierService.creerPanier(internaute, totalPanier);
 
-            //  Ajouter les lignes du panier
+            // Ajouter les lignes du panier
             lignePanierService.ajouterLignesAuPanier(lignesSession, panier);
 
             // Créer la commande
@@ -56,7 +58,6 @@ public class CommandeService {
         }
     }
 
-
     public List<Commande> getCommandesByInternaute(Internaute internaute) {
         return em.createQuery(
                         "SELECT c FROM Commande c WHERE c.internaute = :internaute ORDER BY c.dateCommande DESC",
@@ -64,6 +65,4 @@ public class CommandeService {
                 .setParameter("internaute", internaute)
                 .getResultList();
     }
-
-
 }

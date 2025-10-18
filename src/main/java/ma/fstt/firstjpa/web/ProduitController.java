@@ -1,9 +1,12 @@
 package ma.fstt.firstjpa.web;
 
-import jakarta.servlet.*;
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import ma.fstt.firstjpa.entities.*;
+import ma.fstt.firstjpa.entities.Internaute;
+import ma.fstt.firstjpa.entities.LignePanier;
+import ma.fstt.firstjpa.entities.Produit;
 import ma.fstt.firstjpa.services.ProduitService;
 
 import java.io.IOException;
@@ -13,7 +16,8 @@ import java.util.List;
 @WebServlet("/produit")
 public class ProduitController extends HttpServlet {
 
-    private ProduitService produitService = new ProduitService();
+    @Inject
+    private ProduitService produitService; // ✅ CDI s’en charge
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -35,7 +39,6 @@ public class ProduitController extends HttpServlet {
                 Long produitId = Long.parseLong(request.getParameter("id"));
                 Produit produit = produitService.findById(produitId);
 
-                // Panier en session
                 List<LignePanier> panier = (List<LignePanier>) session.getAttribute("panier");
                 if (panier == null) {
                     panier = new ArrayList<>();
@@ -64,10 +67,11 @@ public class ProduitController extends HttpServlet {
                 break;
             }
 
-            default: { // Afficher la liste des produits
+            default: {
                 List<Produit> produits = produitService.getAllProduits();
                 request.setAttribute("produits", produits);
-                request.getRequestDispatcher("/WEB-INF/views/internaute/dashboard.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/internaute/dashboard.jsp")
+                        .forward(request, response);
                 break;
             }
         }
